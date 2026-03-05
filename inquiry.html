@@ -382,7 +382,7 @@
   </div>
 
   <div class="form-card">
-    <form id="inquiryForm">
+    <form id="inquiryForm" data-netlify="false">
       <div class="form-grid">
 
         <div class="field">
@@ -466,14 +466,18 @@
   </div>
 
   <p class="footer-note">
-    Questions? <a href="mailto:info@nationalathleteindex.com">info@nationalathleteindex.com</a>
+    Questions? <a href="/cdn-cgi/l/email-protection#650c0b030a250b04110c0a0b040904110d090011000c0b01001d4b060a08"><span class="__cf_email__" data-cfemail="cfa6a1a9a08fa1aebba6a0a1aea3aebba7a3aabbaaa6a1abaab7e1aca0a2">[email&#160;protected]</span></a>
   </p>
 
 </div>
 
-<script>
-  document.getElementById('inquiryForm').addEventListener('submit', function(e) {
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  document.getElementById('inquiryForm').addEventListener('submit', async function(e) {
     e.preventDefault();
+
+    const btn = document.querySelector('.submit-btn');
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
 
     const data = {
       coachName: document.getElementById('coachName').value,
@@ -486,21 +490,28 @@
       budget: document.querySelector('input[name="budget"]:checked')?.value || 'Not specified'
     };
 
-    console.log('Inquiry submitted:', data);
+    try {
+      const response = await fetch('https://formspree.io/f/mojkavel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(data)
+      });
 
-    // Hide form, show success
-    document.getElementById('inquiryForm').style.display = 'none';
-    document.getElementById('successState').style.display = 'block';
+      if (response.ok) {
+        document.getElementById('inquiryForm').style.display = 'none';
+        document.getElementById('successState').style.display = 'block';
+      } else {
+        btn.textContent = 'Try Again';
+        btn.disabled = false;
+        alert('Something went wrong. Please try again.');
+      }
+    } catch(err) {
+      btn.textContent = 'Try Again';
+      btn.disabled = false;
+      alert('Something went wrong. Please try again.');
+    }
   });
 
   // Phone formatter
   document.getElementById('phone').addEventListener('input', function(e) {
-    let v = e.target.value.replace(/\D/g, '');
-    if (v.length >= 6) v = '(' + v.slice(0,3) + ') ' + v.slice(3,6) + '-' + v.slice(6,10);
-    else if (v.length >= 3) v = '(' + v.slice(0,3) + ') ' + v.slice(3);
-    e.target.value = v;
-  });
-</script>
-
-</body>
-</html>
+    
